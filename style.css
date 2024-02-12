@@ -1,26 +1,30 @@
-body{
-    background-color: honeydew;
-    width: 100vw;
-    height: 100vh;
+body {
+  background-color: honeydew;
+  width: 100vw;
+  height: 100vh;
 
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.grid{
-    height: 600px;
-    width: 600px;
-    background-color: grey;
+.grid {
+  height: 600px;
+  width: 600px;
+  background-color: grey;
 
-    display: grid;
-    grid-template-columns: repeat(11, 1fr);
-    grid-template-rows: repeat(11, 1fr);
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  grid-template-rows: repeat(11, 1fr);
 }
 
-.cell:nth-child(odd){
-    background-color: darkgrey;
-    
+.cell:nth-child(odd) {
+  background-color: darkgrey;
 }
 
+.cell.player-head {
+  background-color: red; 
+}
+.cell.player-body {
+  background-color: black;
+}
