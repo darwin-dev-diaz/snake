@@ -1,47 +1,11 @@
-body {
-  background-color: honeydew;
-  width: 100vw;
-  height: 100vh;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* This ensures no scrollbars */
+  background-color: #ffffff;
 }
-
-.grid {
-  height: 600px;
-  width: 600px;
-  background-color: grey;
-
-  display: grid;
-  grid-template-columns: repeat(11, 1fr);
-  grid-template-rows: repeat(11, 1fr);
-}
-
-.grid.overlay>.cell{
-    background-color: grey;
-
-}
-
-.grid.overlay{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-}
-.grid.overlay::before{
-    content: "Press any key to start";
-
-
-}
-
-.cell:nth-child(odd) {
-  background-color: darkgrey;
-}
-
-.cell.player-head {
-  background-color: red; 
-}
-.cell.player-body {
-  background-color: black;
+canvas {
+  display: block;
+  width: 100vw; /* 100% of viewport width */
+  height: 100vh; /* 100% of viewport height */
 }
