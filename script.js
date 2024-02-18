@@ -10,7 +10,6 @@ window.addEventListener("resize", () => {
 });
 
 function createTileObject(tileX, tileY, tileSize, tileType, tileEmptyColor) {
-
   const draw = () => {
     c.fillStyle = tileEmptyColor;
     c.fillRect(tileX, tileY, tileSize, tileSize);
@@ -20,42 +19,87 @@ function createTileObject(tileX, tileY, tileSize, tileType, tileEmptyColor) {
     return this.tileType;
   };
 
-  return {draw, getTileType}
+  return { draw, getTileType };
 }
 
-const Grid = ((gridDimension, gridPixelSize)=>{
+const Grid = ((gridDimension, gridPixelSize) => {
   const tileArray = [];
   function genGrid() {
-    c.fillRect(
-      innerWidth / 2 - gridPixelSize / 2,
-      innerHeight / 2 - gridPixelSize / 2,
-      gridPixelSize,
-      gridPixelSize
-    );
-  
-    const emptyGridColors = ['#8ECC39','#A8D948'];
+    const emptyGridColors = ["#8ECC39", "#A8D948"];
+    const borderColor = "#4a4a4a"
     const blockSize = gridPixelSize / gridDimension;
     const blockPixelSize = blockSize - 1;
     for (let i = 0; i < gridDimension; i++) {
-      for (let j = 0; j < gridDimension; j++) {
-        let colorIndex = (i + j) % emptyGridColors.length;
-        let color = emptyGridColors[colorIndex];
-        tileArray.push(
-          createTileObject(
-            blockSize / 2 +
-              blockSize * i +
-              (innerWidth / 2 - gridPixelSize / 2) -
-              blockPixelSize / 2,
-            blockSize / 2 +
-              blockSize * j +
-              (innerHeight / 2 - gridPixelSize / 2) -
-              blockPixelSize / 2,
-            blockPixelSize,
-            blockPixelSize,
-            color
-          )
-        );
+      tileArray.push(
+        createTileObject(
+          blockSize / 2 +
+            blockSize * i +
+            (innerWidth / 2 - gridPixelSize / 2) -
+            blockPixelSize / 2,
+          blockSize / 2 +
+            (innerHeight / 2 - gridPixelSize / 2) -
+            blockPixelSize / 2,
+          blockPixelSize + 2,
+          "empty",
+          borderColor
+        )
+      );
+    }
+    for (let i = 0; i < gridDimension; i++) {
+      for (let j = 1; j < gridDimension - 1; j++) {
+        if (!(i === 0 || i === gridDimension - 1)) {
+          let colorIndex = (i + j) % emptyGridColors.length;
+          let color = emptyGridColors[colorIndex];
+          tileArray.push(
+            createTileObject(
+              blockSize / 2 +
+                blockSize * i +
+                (innerWidth / 2 - gridPixelSize / 2) -
+                blockPixelSize / 2,
+              blockSize / 2 +
+                blockSize * j +
+                (innerHeight / 2 - gridPixelSize / 2) -
+                blockPixelSize / 2,
+              blockPixelSize + 2,
+              "empty",
+              color
+            )
+          );
+        } else {
+          color = "grey";
+          tileArray.push(
+            createTileObject(
+              blockSize / 2 +
+                blockSize * i +
+                (innerWidth / 2 - gridPixelSize / 2) -
+                blockPixelSize / 2,
+              blockSize / 2 +
+                blockSize * j +
+                (innerHeight / 2 - gridPixelSize / 2) -
+                blockPixelSize / 2,
+              blockPixelSize + 2,
+              "border",
+              borderColor
+            )
+          );
+        }
       }
+    }
+    for (let i = 0; i < gridDimension; i++) {
+      tileArray.push(
+        createTileObject(
+          blockSize / 2 +
+            blockSize * i +
+            (innerWidth / 2 - gridPixelSize / 2) -
+            blockPixelSize / 2,
+          blockSize / 2 + (blockSize * (gridDimension-1)) +
+            (innerHeight / 2 - gridPixelSize / 2) -
+            blockPixelSize / 2,
+          blockPixelSize + 2,
+          "empty",
+          borderColor
+        )
+      );
     }
   }
 
@@ -65,20 +109,16 @@ const Grid = ((gridDimension, gridPixelSize)=>{
 
   return {
     genGrid,
-    drawTiles
-  }
+    drawTiles,
+  };
+})(15, 800);
 
-})(12, 800);
-
-
-
+Grid.genGrid();
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, innerWidth, innerHeight);
 
+  Grid.drawTiles();
 }
 
-// init();
-// animate();
-Grid.genGrid();
-Grid.drawTiles();
+animate();
