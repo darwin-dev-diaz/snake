@@ -9,14 +9,14 @@ window.addEventListener("resize", () => {
   // init();
 });
 
-function TileObject(tileX, tileY, tileSize, tileType) {
+function TileObject(tileX, tileY, tileSize, tileType, tileEmptyColor) {
   this.tileX = tileX;
   this.tileY = tileY;
   this.tileSize = tileSize;
   this.tileType = tileType;
 
   this.draw = () => {
-    c.fillStyle = "black";
+    c.fillStyle = tileEmptyColor;
     c.fillRect(this.tileX, this.tileY, this.tileSize, this.tileSize);
   };
 
@@ -27,7 +27,6 @@ function TileObject(tileX, tileY, tileSize, tileType) {
 
 const tileArray = [];
 function genGrid(gridDimension, gridPixelSize) {
-  c.fillStyle = "pink";
   c.fillRect(
     innerWidth / 2 - gridPixelSize / 2,
     innerHeight / 2 - gridPixelSize / 2,
@@ -35,31 +34,34 @@ function genGrid(gridDimension, gridPixelSize) {
     gridPixelSize
   );
 
+  const emptyGridColors = ['#8ECC39','#A8D948'];
   const blockSize = gridPixelSize / gridDimension;
-  const blockPixelSize = blockSize-1;
+  const blockPixelSize = blockSize - 1;
   for (let i = 0; i < gridDimension; i++) {
     for (let j = 0; j < gridDimension; j++) {
+      let colorIndex = (i + j) % emptyGridColors.length;
+      let color = emptyGridColors[colorIndex];
       tileArray.push(
         new TileObject(
           blockSize / 2 +
             blockSize * i +
             (innerWidth / 2 - gridPixelSize / 2) -
-            blockPixelSize / 2
-        ,
-        blockSize / 2 +
-          blockSize * j +
-          (innerHeight / 2 - gridPixelSize / 2) -
-          blockPixelSize / 2,
-        blockPixelSize,
-        blockPixelSize
-      ));
-      console.log('test');
+            blockPixelSize / 2,
+          blockSize / 2 +
+            blockSize * j +
+            (innerHeight / 2 - gridPixelSize / 2) -
+            blockPixelSize / 2,
+          blockPixelSize,
+          blockPixelSize,
+          color
+        )
+      );
     }
   }
 }
 
-function drawTiles(tileArray){
-  tileArray.forEach(tile => tile.draw());
+function drawTiles(tileArray) {
+  tileArray.forEach((tile) => tile.draw());
 }
 
 function animate() {
@@ -71,5 +73,5 @@ function animate() {
 
 // init();
 // animate();
-genGrid(14, 800);
+genGrid(12, 800);
 drawTiles(tileArray);
