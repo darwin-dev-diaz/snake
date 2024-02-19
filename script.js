@@ -27,57 +27,66 @@ function createTileObject(tileX, tileY, tileSize, tileType, tileColor) {
   };
 
   const getTileType = () => {
-    return this.tileType;
+    return tileType;
   };
-
-  const update = () => {
-    if (
-      Math.abs(tileX + tileSize / 2 - mouse.x) < 10 &&
-      Math.abs(tileY + tileSize / 2 - mouse.y + 100) < 10
-    ) {
-      fillColor = "red";
-    }
+  const changeColor = (color) => {
+    fillColor = color;
   };
+  const update = () => {};
 
   return { draw, getTileType, update };
 }
 
 const Grid = ((gridDimension, gridPixelSize) => {
-  const tileArray = [];
+  const grid = [];
   function genGrid() {
     const emptyGridColors = ["#8ECC39", "#A8D948"];
     const borderColor = "#4a4a4a";
     const blockSize = gridPixelSize / gridDimension;
     const blockPixelSize = blockSize - 1;
-    for (let i = 0; i < gridDimension; i++) {
-      tileArray.push(
-        createTileObject(
-          blockSize / 2 +
-            blockSize * i +
-            (innerWidth / 2 - gridPixelSize / 2) -
-            blockPixelSize / 2,
-          blockSize / 2 +
-            (innerHeight / 2 - gridPixelSize / 2) -
-            blockPixelSize / 2,
-          blockPixelSize + 2,
-          "empty",
-          borderColor
-        )
-      );
-    }
-    for (let i = 0; i < gridDimension; i++) {
-      for (let j = 1; j < gridDimension - 1; j++) {
-        if (!(i === 0 || i === gridDimension - 1)) {
-          let colorIndex = (i + j) % emptyGridColors.length;
-          let color = emptyGridColors[colorIndex];
-          tileArray.push(
+    for(let row = 0; row < gridDimension; row++){
+      const rowArr = [];
+      for(let col = 0; col < gridDimension; col++){
+        if(row === 0 || row === gridDimension-1){
+          rowArr.push(
             createTileObject(
               blockSize / 2 +
-                blockSize * i +
+                blockSize * col +
                 (innerWidth / 2 - gridPixelSize / 2) -
                 blockPixelSize / 2,
               blockSize / 2 +
-                blockSize * j +
+                blockSize * row +
+                (innerHeight / 2 - gridPixelSize / 2) -
+                blockPixelSize / 2,
+              blockPixelSize + 2,
+              "border",
+              borderColor));
+
+        } else if (col === 0 || col === gridDimension-1) {
+          rowArr.push(
+            createTileObject(
+              blockSize / 2 +
+                blockSize * col +
+                (innerWidth / 2 - gridPixelSize / 2) -
+                blockPixelSize / 2,
+              blockSize / 2 +
+                blockSize * row +
+                (innerHeight / 2 - gridPixelSize / 2) -
+                blockPixelSize / 2,
+              blockPixelSize + 2,
+              "border",
+              borderColor));
+        } else {
+          let colorIndex = (col + row) % emptyGridColors.length;
+          let color = emptyGridColors[colorIndex];
+          rowArr.push(
+            createTileObject(
+              blockSize / 2 +
+                blockSize * col +
+                (innerWidth / 2 - gridPixelSize / 2) -
+                blockPixelSize / 2,
+              blockSize / 2 +
+                blockSize * row +
                 (innerHeight / 2 - gridPixelSize / 2) -
                 blockPixelSize / 2,
               blockPixelSize + 2,
@@ -85,42 +94,9 @@ const Grid = ((gridDimension, gridPixelSize) => {
               color
             )
           );
-        } else {
-          color = "grey";
-          tileArray.push(
-            createTileObject(
-              blockSize / 2 +
-                blockSize * i +
-                (innerWidth / 2 - gridPixelSize / 2) -
-                blockPixelSize / 2,
-              blockSize / 2 +
-                blockSize * j +
-                (innerHeight / 2 - gridPixelSize / 2) -
-                blockPixelSize / 2,
-              blockPixelSize + 2,
-              "border",
-              borderColor
-            )
-          );
         }
       }
-    }
-    for (let i = 0; i < gridDimension; i++) {
-      tileArray.push(
-        createTileObject(
-          blockSize / 2 +
-            blockSize * i +
-            (innerWidth / 2 - gridPixelSize / 2) -
-            blockPixelSize / 2,
-          blockSize / 2 +
-            blockSize * (gridDimension - 1) +
-            (innerHeight / 2 - gridPixelSize / 2) -
-            blockPixelSize / 2,
-          blockPixelSize + 2,
-          "empty",
-          borderColor
-        )
-      );
+      grid.push(rowArr);
     }
   }
 
@@ -128,22 +104,23 @@ const Grid = ((gridDimension, gridPixelSize) => {
     tileArray.forEach((tile) => tile.update());
   }
   function drawTiles() {
-    tileArray.forEach((tile) => tile.draw());
+    grid.forEach((row) => row.forEach(cell=>cell.draw()));
   }
 
   return {
+    grid,
     genGrid,
     drawTiles,
     updateTiles,
   };
-})(20, 800);
+})(14, 500);
 
 Grid.genGrid();
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, innerWidth, innerHeight);
 
-  Grid.updateTiles();
+  // Grid.updateTiles();
   Grid.drawTiles();
 }
 
