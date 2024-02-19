@@ -14,8 +14,8 @@ window.addEventListener("mousemove", (event) => {
 });
 
 window.addEventListener("keydown", (event) => {
-  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)){
-    console.log('arrow key');
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+    console.log("arrow key");
   }
 });
 
@@ -25,8 +25,14 @@ window.addEventListener("resize", () => {
   // init();
 });
 
-function createTileObject(tileX, tileY, tileSize, tileType, tileColor) {
-  let fillColor = tileColor;
+function createTileObject(tileX, tileY, tileSize, tileType) {
+  const colors = {
+    border: "#4a4a4a",
+    playerHead: "red",
+    emptyOne: "#8ECC39",
+    emptyTwo: "#A8D948",
+  };
+  let fillColor = colors[tileType];
   const draw = () => {
     c.fillStyle = fillColor;
     c.fillRect(tileX, tileY, tileSize, tileSize);
@@ -38,31 +44,46 @@ function createTileObject(tileX, tileY, tileSize, tileType, tileColor) {
   const changeColor = (color) => {
     fillColor = color;
   };
-  const update = () => {};
-
-  return { draw, getTileType, update };
-}
-const PlayerHead = ((startX, startY,)=>{
-  const playerHeadColor = 'red';
-  let x = startX;
-  let y = startY;
+  const updateTileType = (newTileType) => {
+    if (newTileType === "playerHead") {
+      tileType = newTileType;
+      fillColor = colors.playerHead;
+    } else if (newTileType === "emptyOne" || newTileType === "emptyTwo") {
+      tileType = newTileType;
+      fillColor = colors[newTileType];
+    }
+  };
 
   const update = () => {
 
   }
+
+  return { draw, getTileType, updateTileType, update};
+}
+
+function createPlayerHead(x, y){
+  const playerHeadColor = "red";
+
+  const move = (dx, dy) => {
+    x += dx;
+    y += dy;
+  };
+
+  const getHeadColor = () => playerHeadColor;
+  const getX = () => x;
+  const getY = () => y;
+
   return {
-    playerHeadColor,
-    x,
-    y
+    getHeadColor,
+    getX,
+    getY,
+    move,
+  };
+};
 
-  }
-
-})(4,4);
 const Grid = ((gridDimension, gridPixelSize) => {
   const grid = [];
   function genGrid() {
-    const emptyGridColors = ["#8ECC39", "#A8D948"];
-    const borderColor = "#4a4a4a";
     const blockSize = gridPixelSize / gridDimension;
     const blockPixelSize = blockSize - 1;
     for (let row = 0; row < gridDimension; row++) {
@@ -80,8 +101,7 @@ const Grid = ((gridDimension, gridPixelSize) => {
                 (innerHeight / 2 - gridPixelSize / 2) -
                 blockPixelSize / 2,
               blockPixelSize + 2,
-              "border",
-              borderColor
+              "border"
             )
           );
         } else if (col === 0 || col === gridDimension - 1) {
@@ -96,13 +116,11 @@ const Grid = ((gridDimension, gridPixelSize) => {
                 (innerHeight / 2 - gridPixelSize / 2) -
                 blockPixelSize / 2,
               blockPixelSize + 2,
-              "border",
-              borderColor
+              "border"
             )
           );
         } else {
-          let colorIndex = (col + row) % emptyGridColors.length;
-          let color = emptyGridColors[colorIndex];
+          let colorIndex = (col + row) % 2;
           rowArr.push(
             createTileObject(
               blockSize / 2 +
@@ -114,8 +132,7 @@ const Grid = ((gridDimension, gridPixelSize) => {
                 (innerHeight / 2 - gridPixelSize / 2) -
                 blockPixelSize / 2,
               blockPixelSize + 2,
-              "empty",
-              color
+              ["emptyOne", "emptyTwo"][colorIndex]
             )
           );
         }
@@ -127,19 +144,37 @@ const Grid = ((gridDimension, gridPixelSize) => {
   function updateTiles() {
     grid.forEach((row) => row.forEach((cell) => cell.update()));
   }
+  function updateTile(row,col,tileType){
+    grid[row][col].updateTileType(tileType);
+  }
   function drawTiles() {
     grid.forEach((row) => row.forEach((cell) => cell.draw()));
   }
 
+
   return {
-    grid,
     genGrid,
     drawTiles,
     updateTiles,
+    updateTile,
   };
 })(14, 700);
 
-Grid.genGrid();
+const GameController = (()=>{
+  const playerHead = createPlayerHead(4,4);
+  const startGame = () => {
+    Grid.genGrid();
+    Grid.updateTile(playerHead.getX(), playerHead.getY(), 'playerHead');
+  }
+
+  
+
+  return {
+    startGame,
+  }
+})();
+
+GameController.startGame();
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, innerWidth, innerHeight);
