@@ -13,6 +13,12 @@ window.addEventListener("mousemove", (event) => {
   mouse.y = event.screenY;
 });
 
+window.addEventListener("keydown", (event) => {
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)){
+    console.log('arrow key');
+  }
+});
+
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -36,7 +42,22 @@ function createTileObject(tileX, tileY, tileSize, tileType, tileColor) {
 
   return { draw, getTileType, update };
 }
+const PlayerHead = ((startX, startY,)=>{
+  const playerHeadColor = 'red';
+  let x = startX;
+  let y = startY;
 
+  const update = () => {
+
+  }
+  return {
+    playerHeadColor,
+    x,
+    y
+
+  }
+
+})(4,4);
 const Grid = ((gridDimension, gridPixelSize) => {
   const grid = [];
   function genGrid() {
@@ -44,10 +65,10 @@ const Grid = ((gridDimension, gridPixelSize) => {
     const borderColor = "#4a4a4a";
     const blockSize = gridPixelSize / gridDimension;
     const blockPixelSize = blockSize - 1;
-    for(let row = 0; row < gridDimension; row++){
+    for (let row = 0; row < gridDimension; row++) {
       const rowArr = [];
-      for(let col = 0; col < gridDimension; col++){
-        if(row === 0 || row === gridDimension-1){
+      for (let col = 0; col < gridDimension; col++) {
+        if (row === 0 || row === gridDimension - 1) {
           rowArr.push(
             createTileObject(
               blockSize / 2 +
@@ -60,9 +81,10 @@ const Grid = ((gridDimension, gridPixelSize) => {
                 blockPixelSize / 2,
               blockPixelSize + 2,
               "border",
-              borderColor));
-
-        } else if (col === 0 || col === gridDimension-1) {
+              borderColor
+            )
+          );
+        } else if (col === 0 || col === gridDimension - 1) {
           rowArr.push(
             createTileObject(
               blockSize / 2 +
@@ -75,7 +97,9 @@ const Grid = ((gridDimension, gridPixelSize) => {
                 blockPixelSize / 2,
               blockPixelSize + 2,
               "border",
-              borderColor));
+              borderColor
+            )
+          );
         } else {
           let colorIndex = (col + row) % emptyGridColors.length;
           let color = emptyGridColors[colorIndex];
@@ -101,10 +125,10 @@ const Grid = ((gridDimension, gridPixelSize) => {
   }
 
   function updateTiles() {
-    tileArray.forEach((tile) => tile.update());
+    grid.forEach((row) => row.forEach((cell) => cell.update()));
   }
   function drawTiles() {
-    grid.forEach((row) => row.forEach(cell=>cell.draw()));
+    grid.forEach((row) => row.forEach((cell) => cell.draw()));
   }
 
   return {
@@ -113,14 +137,14 @@ const Grid = ((gridDimension, gridPixelSize) => {
     drawTiles,
     updateTiles,
   };
-})(14, 500);
+})(14, 700);
 
 Grid.genGrid();
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, innerWidth, innerHeight);
 
-  // Grid.updateTiles();
+  Grid.updateTiles();
   Grid.drawTiles();
 }
 
