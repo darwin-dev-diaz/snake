@@ -3,20 +3,21 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const c = canvas.getContext("2d");
 
-const mouse = {
-  x: null,
-  y: null,
-};
-
-window.addEventListener("mousemove", (event) => {
-  mouse.x = event.screenX;
-  mouse.y = event.screenY;
-});
+let dXY = [0, 0];
 
 window.addEventListener("keydown", (event) => {
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
-    console.log("arrow key");
+  if (event.key === "ArrowUp") {
+    dXY[1] = 1;
+  } else if (event.key === "ArrowDown") {
+    dXY[1] = -1;
+  } else if (event.key === "ArrowRight") {
+    dXY[0] = 1;
+  } else if (event.key === "ArrowLeft") {
+    dXY[0] = -1;
   }
+  GameController.movePlayerOnGrid();
+
+  dXY = [0,0];
 });
 
 window.addEventListener("resize", () => {
@@ -54,14 +55,12 @@ function createTileObject(tileX, tileY, tileSize, tileType) {
     }
   };
 
-  const update = () => {
+  const update = () => {};
 
-  }
-
-  return { draw, getTileType, updateTileType, update};
+  return { draw, getTileType, updateTileType, update };
 }
 
-function createPlayerHead(x, y){
+function createPlayerHead(x, y) {
   const playerHeadColor = "red";
 
   const move = (dx, dy) => {
@@ -79,7 +78,7 @@ function createPlayerHead(x, y){
     getY,
     move,
   };
-};
+}
 
 const Grid = ((gridDimension, gridPixelSize) => {
   const grid = [];
@@ -144,13 +143,12 @@ const Grid = ((gridDimension, gridPixelSize) => {
   function updateTiles() {
     grid.forEach((row) => row.forEach((cell) => cell.update()));
   }
-  function updateTile(row,col,tileType){
+  function updateTile(row, col, tileType) {
     grid[row][col].updateTileType(tileType);
   }
   function drawTiles() {
     grid.forEach((row) => row.forEach((cell) => cell.draw()));
   }
-
 
   return {
     genGrid,
@@ -160,18 +158,29 @@ const Grid = ((gridDimension, gridPixelSize) => {
   };
 })(14, 700);
 
-const GameController = (()=>{
-  const playerHead = createPlayerHead(4,4);
+const GameController = (() => {
+  const playerHead = createPlayerHead(4, 4);
   const startGame = () => {
     Grid.genGrid();
-    Grid.updateTile(playerHead.getX(), playerHead.getY(), 'playerHead');
-  }
+    Grid.updateTile(playerHead.getX(), playerHead.getY(), "playerHead");
+  };
 
-  
+  const paintGame = () => {
+    Grid.updateTiles();
+    Grid.drawTiles();
+  };
+  const movePlayerOnGrid = () => {
+    Grid.updateTile(playerHead.getX(), playerHead.getY(), "emptyOne");
+    playerHead.move(dXY[0],dXY[1]);
+    Grid.updateTile(playerHead.getX(), playerHead.getY(), "playerHead");
+
+  };
 
   return {
     startGame,
-  }
+    paintGame,
+    movePlayerOnGrid,
+  };
 })();
 
 GameController.startGame();
@@ -179,8 +188,7 @@ function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, innerWidth, innerHeight);
 
-  Grid.updateTiles();
-  Grid.drawTiles();
+  GameController.paintGame();
 }
 
 animate();
