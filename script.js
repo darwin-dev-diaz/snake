@@ -16,9 +16,6 @@ window.addEventListener("keydown", (event) => {
   } else if (event.key === "s") {
     dXY = [1, 0];
   }
-  GameController.movePlayerOnGrid();
-
-  dXY = [0, 0];
 });
 
 window.addEventListener("resize", () => {
@@ -184,6 +181,7 @@ const GameController = (() => {
     Grid.updateTiles();
     Grid.drawTiles();
   };
+
   const movePlayerOnGrid = () => {
     if (playerHead) {
       const targetTile = Grid.getTile(
@@ -193,6 +191,7 @@ const GameController = (() => {
       if (targetTile.getTileType() === "border") {
         Grid.updateTile(playerHead.getX(), playerHead.getY(), "empty");
         playerHead = null;
+        console.log('player is dead lmao');
       } else {
         Grid.updateTile(playerHead.getX(), playerHead.getY(), "empty");
         playerHead.move(dXY[0], dXY[1]);
@@ -208,12 +207,21 @@ const GameController = (() => {
   };
 })();
 
-GameController.startGame();
+
+let frames = 0;
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, innerWidth, innerHeight);
+  
+  if(frames === 7){
+    GameController.movePlayerOnGrid();
+    frames = 0;
+  }
 
+  frames++;
+  console.log(frames);
   GameController.paintGame();
 }
 
+GameController.startGame();
 animate();
