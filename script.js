@@ -5,7 +5,7 @@ const c = canvas.getContext("2d");
 
 let dXY = [0, 0];
 
-window.addEventListener("keydown", (event) => {
+window.addEventListener("keypress", (event) => {
   if (event.key === "d") {
     dXY[1] = 1;
     dXY = [0, 1];
@@ -39,6 +39,7 @@ function createTileObject(tileX, tileY, tileSize, tileType) {
     border: "#4a4a4a",
     playerHead: "red",
     empty: emptyColors[++emptyIndex % emptyColors.length],
+    banana: "yellow",
   };
 
   let fillColor = colors[tileType];
@@ -54,13 +55,16 @@ function createTileObject(tileX, tileY, tileSize, tileType) {
     fillColor = color;
   };
   const updateTileType = (newTileType) => {
-    if (newTileType === "playerHead") {
-      tileType = newTileType;
-      fillColor = colors.playerHead;
-    } else if (newTileType === "empty") {
-      tileType = newTileType;
-      fillColor = colors.empty;
-    }
+    // if (newTileType === "playerHead") {
+    //   tileType = newTileType;
+    //   fillColor = colors.playerHead;
+    // } else if (newTileType === "empty") {
+    //   tileType = newTileType;
+    //   fillColor = colors.empty;
+    // }
+
+    tileType = newTileType;
+    fillColor = colors[tileType];
   };
 
   const update = () => {};
@@ -87,8 +91,7 @@ function createPlayerHead(x, y) {
     move,
   };
 }
-
-const Grid = ((gridDimension, gridPixelSize) => {
+function createGridObject(gridDimension, gridPixelSize) {
   const grid = [];
   function genGrid() {
     const blockSize = gridPixelSize / gridDimension;
@@ -168,18 +171,39 @@ const Grid = ((gridDimension, gridPixelSize) => {
     updateTile,
     getTile,
   };
-})(20, 700);
+}
 
 const GameController = (() => {
+  const gridDimension = 20;
+  const gridPixelSize = 700;
+  const Grid = createGridObject(gridDimension, gridPixelSize);
   let playerHead = createPlayerHead(4, 4);
   const startGame = () => {
     Grid.genGrid();
     Grid.updateTile(playerHead.getX(), playerHead.getY(), "playerHead");
+    placeBanana();
   };
 
   const paintGame = () => {
     Grid.updateTiles();
     Grid.drawTiles();
+  };
+
+  const placeBanana = () => {
+    let row = 0;
+    let col = 0;
+    while (true) {
+      row = Math.floor(Math.random() * gridDimension);
+      col = Math.floor(Math.random() * gridDimension);
+      const targetTile = Grid.getTile(row, col);
+      console.log('running while loop');
+      console.log('');
+      if (targetTile.getTileType() === "empty") {
+        Grid.updateTile(row, col, 'banana');
+        console.log('placed banana');
+        break;
+      }
+    }
   };
 
   const movePlayerOnGrid = () => {
@@ -188,11 +212,16 @@ const GameController = (() => {
         playerHead.getX() + dXY[0],
         playerHead.getY() + dXY[1]
       );
+      // collision
       if (targetTile.getTileType() === "border") {
         Grid.updateTile(playerHead.getX(), playerHead.getY(), "empty");
         playerHead = null;
-        console.log('player is dead lmao');
-      } else {
+        console.log("player is dead lmao");
+      }
+      else {
+        if (targetTile.getTileType() === 'banana'){
+          placeBanana();
+        }
         Grid.updateTile(playerHead.getX(), playerHead.getY(), "empty");
         playerHead.move(dXY[0], dXY[1]);
         Grid.updateTile(playerHead.getX(), playerHead.getY(), "playerHead");
@@ -207,19 +236,18 @@ const GameController = (() => {
   };
 })();
 
-
 let frames = 0;
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, innerWidth, innerHeight);
-  
-  if(frames === 7){
+
+  if (frames === 7) {
     GameController.movePlayerOnGrid();
     frames = 0;
   }
 
   frames++;
-  console.log(frames);
+  // console.log(frames);
   GameController.paintGame();
 }
 
