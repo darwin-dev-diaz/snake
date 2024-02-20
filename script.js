@@ -38,6 +38,7 @@ function createTileObject(tileX, tileY, tileSize, tileType) {
   const colors = {
     border: "#4a4a4a",
     playerHead: "red",
+    playerBody: "orange",
     empty: emptyColors[++emptyIndex % emptyColors.length],
     banana: "yellow",
   };
@@ -51,18 +52,7 @@ function createTileObject(tileX, tileY, tileSize, tileType) {
   const getTileType = () => {
     return tileType;
   };
-  const changeColor = (color) => {
-    fillColor = color;
-  };
   const updateTileType = (newTileType) => {
-    // if (newTileType === "playerHead") {
-    //   tileType = newTileType;
-    //   fillColor = colors.playerHead;
-    // } else if (newTileType === "empty") {
-    //   tileType = newTileType;
-    //   fillColor = colors.empty;
-    // }
-
     tileType = newTileType;
     fillColor = colors[tileType];
   };
@@ -73,19 +63,31 @@ function createTileObject(tileX, tileY, tileSize, tileType) {
 }
 
 function createPlayerHead(x, y) {
-  const playerHeadColor = "red";
-
   const move = (dx, dy) => {
     x += dx;
     y += dy;
   };
 
-  const getHeadColor = () => playerHeadColor;
+  const getTileType = () => "playerHead";
   const getX = () => x;
   const getY = () => y;
 
   return {
-    getHeadColor,
+    getTileType,
+    getX,
+    getY,
+    move,
+  };
+}
+
+function createPlayerBody(x, y) {
+  const move = (newX, newY) => {
+    x = newX;
+    y = newY;
+  };
+  const getX = () => x;
+  const getY = () => y;
+  return {
     getX,
     getY,
     move,
@@ -177,10 +179,18 @@ const GameController = (() => {
   const gridDimension = 20;
   const gridPixelSize = 700;
   const Grid = createGridObject(gridDimension, gridPixelSize);
-  let playerHead = createPlayerHead(4, 4);
+
+  // let playerHead = createPlayerHead(4, 4);
+  // let playerBodyTest = createPlayerBody(4,2);
+
+  const player = [createPlayerHead(4, 4)];
+
   const startGame = () => {
     Grid.genGrid();
-    Grid.updateTile(playerHead.getX(), playerHead.getY(), "playerHead");
+    player.forEach((bodyPart) => {
+      Grid.updateTile(bodyPart.getX(), bodyPart.getY(), bodyPart.getTileType());
+    });
+    // Grid.updateTile(playerHead.getX(), playerHead.getY(), "playerHead");
     placeBanana();
   };
 
@@ -196,35 +206,39 @@ const GameController = (() => {
       row = Math.floor(Math.random() * gridDimension);
       col = Math.floor(Math.random() * gridDimension);
       const targetTile = Grid.getTile(row, col);
-      console.log('running while loop');
-      console.log('');
+      console.log("running while loop");
+      console.log("");
       if (targetTile.getTileType() === "empty") {
-        Grid.updateTile(row, col, 'banana');
-        console.log('placed banana');
+        Grid.updateTile(row, col, "banana");
+        console.log("placed banana");
         break;
       }
     }
   };
 
   const movePlayerOnGrid = () => {
-    if (playerHead) {
+    if (player[0]) {
       const targetTile = Grid.getTile(
-        playerHead.getX() + dXY[0],
-        playerHead.getY() + dXY[1]
+        player[0].getX() + dXY[0],
+        player[0].getY() + dXY[1]
       );
       // collision
       if (targetTile.getTileType() === "border") {
-        Grid.updateTile(playerHead.getX(), playerHead.getY(), "empty");
-        playerHead = null;
+        Grid.updateTile(player[0].getX(), player[0].getY(), "empty");
+        player[0] = null;
         console.log("player is dead lmao");
-      }
-      else {
-        if (targetTile.getTileType() === 'banana'){
+      } else {
+        if (targetTile.getTileType() === "banana") {
           placeBanana();
         }
-        Grid.updateTile(playerHead.getX(), playerHead.getY(), "empty");
-        playerHead.move(dXY[0], dXY[1]);
-        Grid.updateTile(playerHead.getX(), playerHead.getY(), "playerHead");
+        player.forEach((bodyPart) => {
+          Grid.updateTile(bodyPart.getX(), bodyPart.getY(), "empty");
+          // Grid.updateTile(playerBodyTest.getX(), playerBodyTest.getY(), 'empty');
+          // playerBodyTest.move(playerHead.getX(), playerHead.getY());
+          // Grid.updateTile(playerHead.getX(), playerHead.getY(), "playerBody");
+          bodyPart.move(dXY[0], dXY[1]);
+          Grid.updateTile(bodyPart.getX(), bodyPart.getY(), bodyPart.getTileType());
+        });
       }
     }
   };
