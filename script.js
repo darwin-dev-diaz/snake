@@ -14,6 +14,8 @@ window.addEventListener("keypress", (event) => {
     dXY = [-1, 0];
   } else if (event.key === "s" && dXY[0] !== -1) {
     dXY = [1, 0];
+  } else if (event.key == ' '){
+    window.location.reload();
   }
 });
 window.addEventListener("resize", () => {
@@ -29,14 +31,22 @@ const emptyColors = [
   "#A8D948",
   "#8ECC39",
   "#a1cc4b",
+  "#A8D948",
+  "#8ECC39",
+  "#a1cc4b",
+  "#A8D948",
+  "#8ECC39",
+  "#a1cc4b",
 ];
+const snakeBodyColors = ["#120C0C", "#FBD364", "#EF7B3D"];
 let emptyIndex = 0;
+let bodyIndex = 0;
 function createTileObject(tileX, tileY, tileSize, tileType) {
   const originalTileType = tileType;
   const colors = {
     border: "#4a4a4a",
-    playerHead: "red",
-    playerBody: "orange",
+    playerHead: "grey",
+    playerBody: snakeBodyColors[++bodyIndex % snakeBodyColors.length],
     empty: emptyColors[++emptyIndex % emptyColors.length],
     banana: "yellow",
   };
@@ -180,7 +190,8 @@ const GameController = (() => {
   const gridPixelSize = 700;
   const Grid = createGridObject(gridDimension, gridPixelSize);
 
-  const player = [
+  let player = [];
+  const newPlayer = [
     createPlayerHead(4, 4),
     createPlayerBody(4, 3),
     createPlayerBody(4, 2),
@@ -193,6 +204,9 @@ const GameController = (() => {
 
   const startGame = () => {
     Grid.genGrid();
+    player = [];
+    player = [...newPlayer];
+    console.log(player);
     player.forEach((bodyPart) => {
       Grid.updateTile(bodyPart.getX(), bodyPart.getY(), bodyPart.getTileType());
     });
@@ -246,7 +260,7 @@ const GameController = (() => {
       ) {
         Grid.updateTile(player[0].getX(), player[0].getY(), "empty");
         player[0] = null;
-        console.log("player is dead lmao");
+        console.log(`Collided with ${targetTile.getTileType()}`);
       } else {
         if (targetTile.getTileType() === "banana") {
           growPlayer(3);
@@ -296,13 +310,18 @@ function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, innerWidth, innerHeight);
 
-  if (frames === 2) {
+  if (frames === 3) {
     GameController.movePlayerOnGrid();
     frames = 0;
   }
 
   frames++;
   GameController.paintGame();
+
+  c.font = "50px Arial";
+  c.fillStyle = 'white';
+  let textWidth = c.measureText(`Refresh page to reset`).width;
+  c.fillText(`Refresh page to reset`, (canvas.width - textWidth)/2, canvas.height/2-325);
 }
 
 GameController.startGame();
