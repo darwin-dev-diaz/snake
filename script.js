@@ -6,18 +6,16 @@ const c = canvas.getContext("2d");
 let dXY = [0, 0];
 
 window.addEventListener("keypress", (event) => {
-  if (event.key === "d") {
-    dXY[1] = 1;
+  if (event.key === "d" && dXY[1] !== -1) {
     dXY = [0, 1];
-  } else if (event.key === "a") {
+  } else if (event.key === "a" && dXY[1] !== 1) {
     dXY = [0, -1];
-  } else if (event.key === "w") {
+  } else if (event.key === "w" && dXY[0] !== 1) {
     dXY = [-1, 0];
-  } else if (event.key === "s") {
+  } else if (event.key === "s" && dXY[0] !== -1) {
     dXY = [1, 0];
   }
 });
-
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -182,21 +180,16 @@ const GameController = (() => {
   const gridPixelSize = 700;
   const Grid = createGridObject(gridDimension, gridPixelSize);
 
-  let playerHead = createPlayerHead(4, 4);
-  let playerBodyTest1 = createPlayerBody(4, 3);
-  let playerBodyTest2 = createPlayerBody(4, 2);
-  let playerBodyTest3 = createPlayerBody(4, 1);
-
-  const getPositions = () => {
-    return {
-      playerX: player[0].getX(),
-      playerY: player[0].getY(),
-      bodyX: playerBodyTest1.getX(),
-      bodyY: playerBodyTest1.getY(),
-    };
-  };
-
-  const player = [createPlayerHead(4, 4), createPlayerBody(4, 3), createPlayerBody(4, 2), createPlayerBody(4, 3),createPlayerBody(4, 3),createPlayerBody(4, 3),createPlayerBody(4, 3),createPlayerBody(4, 3),];
+  const player = [
+    createPlayerHead(4, 4),
+    createPlayerBody(4, 3),
+    createPlayerBody(4, 2),
+    createPlayerBody(4, 3),
+    createPlayerBody(4, 3),
+    createPlayerBody(4, 3),
+    createPlayerBody(4, 3),
+    createPlayerBody(4, 3),
+  ];
 
   const startGame = () => {
     Grid.genGrid();
@@ -229,6 +222,17 @@ const GameController = (() => {
     }
   };
 
+  const growPlayer = (growAmount) => {
+    for (let i = 0; i < growAmount; i++) {
+      player.push(
+        createPlayerBody(
+          player[player.length - 1].getX(),
+          player[player.length - 1].getY()
+        )
+      );
+    }
+  };
+
   const movePlayerOnGrid = () => {
     if (player[0]) {
       const targetTile = Grid.getTile(
@@ -236,12 +240,16 @@ const GameController = (() => {
         player[0].getY() + dXY[1]
       );
       // collision
-      if (targetTile.getTileType() === "border") {
+      if (
+        targetTile.getTileType() === "border" ||
+        targetTile.getTileType() === "playerBody"
+      ) {
         Grid.updateTile(player[0].getX(), player[0].getY(), "empty");
         player[0] = null;
         console.log("player is dead lmao");
       } else {
         if (targetTile.getTileType() === "banana") {
+          growPlayer(3);
           placeBanana();
         }
 
@@ -280,8 +288,6 @@ const GameController = (() => {
     startGame,
     paintGame,
     movePlayerOnGrid,
-    getPositions,
-    // player,
   };
 })();
 
@@ -290,14 +296,13 @@ function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, innerWidth, innerHeight);
 
-  if (frames === 7) {
+  if (frames === 2) {
     GameController.movePlayerOnGrid();
     frames = 0;
   }
 
   frames++;
   GameController.paintGame();
-  console.log(GameController.getPositions());
 }
 
 GameController.startGame();
