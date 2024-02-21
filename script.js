@@ -85,9 +85,11 @@ function createPlayerBody(x, y) {
     x = newX;
     y = newY;
   };
+  const getTileType = () => "playerBody";
   const getX = () => x;
   const getY = () => y;
   return {
+    getTileType,
     getX,
     getY,
     move,
@@ -180,17 +182,28 @@ const GameController = (() => {
   const gridPixelSize = 700;
   const Grid = createGridObject(gridDimension, gridPixelSize);
 
-  // let playerHead = createPlayerHead(4, 4);
-  // let playerBodyTest = createPlayerBody(4,2);
+  let playerHead = createPlayerHead(4, 4);
+  let playerBodyTest1 = createPlayerBody(4, 3);
+  let playerBodyTest2 = createPlayerBody(4, 2);
+  let playerBodyTest3 = createPlayerBody(4, 1);
 
-  const player = [createPlayerHead(4, 4)];
+  const getPositions = () => {
+    return {
+      playerX: player[0].getX(),
+      playerY: player[0].getY(),
+      bodyX: playerBodyTest1.getX(),
+      bodyY: playerBodyTest1.getY(),
+    };
+  };
+
+  const player = [createPlayerHead(4, 4), createPlayerBody(4, 3), createPlayerBody(4, 2), createPlayerBody(4, 3),createPlayerBody(4, 3),createPlayerBody(4, 3),createPlayerBody(4, 3),createPlayerBody(4, 3),];
 
   const startGame = () => {
     Grid.genGrid();
     player.forEach((bodyPart) => {
       Grid.updateTile(bodyPart.getX(), bodyPart.getY(), bodyPart.getTileType());
     });
-    // Grid.updateTile(playerHead.getX(), playerHead.getY(), "playerHead");
+
     placeBanana();
   };
 
@@ -231,22 +244,44 @@ const GameController = (() => {
         if (targetTile.getTileType() === "banana") {
           placeBanana();
         }
-        player.forEach((bodyPart) => {
-          Grid.updateTile(bodyPart.getX(), bodyPart.getY(), "empty");
-          // Grid.updateTile(playerBodyTest.getX(), playerBodyTest.getY(), 'empty');
-          // playerBodyTest.move(playerHead.getX(), playerHead.getY());
-          // Grid.updateTile(playerHead.getX(), playerHead.getY(), "playerBody");
-          bodyPart.move(dXY[0], dXY[1]);
-          Grid.updateTile(bodyPart.getX(), bodyPart.getY(), bodyPart.getTileType());
-        });
+
+        if (JSON.stringify(dXY) !== JSON.stringify([0, 0])) {
+          player
+            .slice()
+            .reverse()
+            .forEach((bodyPart, i) => {
+              if (!i) {
+                Grid.updateTile(bodyPart.getX(), bodyPart.getY(), "empty");
+              }
+              if (bodyPart.getTileType() === "playerHead") {
+                bodyPart.move(dXY[0], dXY[1]);
+                Grid.updateTile(
+                  bodyPart.getX(),
+                  bodyPart.getY(),
+                  bodyPart.getTileType()
+                );
+              } else {
+                bodyPart.move(
+                  player.slice().reverse()[i + 1].getX(),
+                  player.slice().reverse()[i + 1].getY()
+                );
+                Grid.updateTile(
+                  bodyPart.getX(),
+                  bodyPart.getY(),
+                  bodyPart.getTileType()
+                );
+              }
+            });
+        }
       }
     }
   };
-
   return {
     startGame,
     paintGame,
     movePlayerOnGrid,
+    getPositions,
+    // player,
   };
 })();
 
@@ -261,8 +296,8 @@ function animate() {
   }
 
   frames++;
-  // console.log(frames);
   GameController.paintGame();
+  console.log(GameController.getPositions());
 }
 
 GameController.startGame();
