@@ -310,7 +310,7 @@ function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, innerWidth, innerHeight);
 
-  if (frames === 3) {
+  if (frames === 6) {
     GameController.movePlayerOnGrid();
     frames = 0;
   }
@@ -320,8 +320,8 @@ function animate() {
 
   c.font = "50px Arial";
   c.fillStyle = 'white';
-  let textWidth = c.measureText(`Refresh page to reset`).width;
-  c.fillText(`Refresh page to reset`, (canvas.width - textWidth)/2, canvas.height/2-325);
+  let textWidth = c.measureText(`WASD. Press space to reset`).width;
+  c.fillText(`WASD. Press space to reset`, (canvas.width - textWidth)/2, canvas.height/2-325);
 }
 
 GameController.startGame();
